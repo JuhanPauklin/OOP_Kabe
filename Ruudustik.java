@@ -16,7 +16,7 @@ public class Ruudustik {
 
     public void looRuudustik() {
         VBox vBox = new VBox(); // tühi vBox kuhu lisatakse
-        Ruut[][] ruudustik = new Ruut[8][8]; // tühi maatriks mida täidetakse
+        Ruut[][] ruudustik = new Ruut[9][8]; // tühi maatriks mida täidetakse
         boolean ruuduVärv = false; // false tähendab hele. true tähendab tume
 
         for (int y = 0; y < 8; y++) {
@@ -50,6 +50,18 @@ public class Ruudustik {
             ruuduVärv = !ruuduVärv; // uuel real peab esimene ruut olema sama värvi, mis eelmise rea viimane
             // nii et muudame uuesti värvi (põhimõtteliselt tühistame "järgmine Ruut tuleb teist värvi" osa)
         }
+
+        HBox hBox = new HBox(); // valge ala tekitamine mängulaua alla
+        Ruut ruut = new Ruut(0,8);
+        ruudustik[8][0] = ruut;
+        Text fillerText = new Text("siia saab nuppe lisada");
+        ruut.getChildren().add(fillerText);
+        ruut.setStyle("-fx-background-color: white;");
+        ruut.setPrefHeight(64);
+        ruut.setPrefWidth(512);
+        hBox.getChildren().add(ruut);
+        vBox.getChildren().add(hBox);
+
         this.vBox = vBox; // väärtustame isendiväjad
         this.maatriks = ruudustik;
     }
@@ -68,5 +80,13 @@ public class Ruudustik {
 
     public void setMaatriks(Ruut[][] maatriks) {
         this.maatriks = maatriks;
+    }
+
+    public void asetaNupud() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 4; j++) {
+
+            }
+        }
     }
 }
