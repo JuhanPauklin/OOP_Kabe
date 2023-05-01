@@ -14,6 +14,10 @@ public class Audio {
         this.fail = fail;
     }
 
+    public File getFail() {
+        return fail;
+    }
+
     public void mängiMuusikat()  throws Exception{ //see meetod alustab muusika mängimist algusest
         try {
             AudioInputStream ais = AudioSystem.getAudioInputStream(fail);
