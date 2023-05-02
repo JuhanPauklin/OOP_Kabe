@@ -65,10 +65,12 @@ public class Mangulaud extends Application {
             if (muusikaMängib.get() == true) { //siis kõigepealt üldse vaatame, kas muusika mängib. kui jah, siis
                 muusikaMängib.set(false);
                 hetkelMängiv.get(0).paus();
+                valgeala.setPausNupp("Unmute");
 
             } else if (muusikaMängib.get() == false && hetkelMängiv.size() != 0) { //kui muusika ei mängi ja laulu enne mängiti (ehk pandi laul pausi peale)
                 muusikaMängib.set(true);
                 hetkelMängiv.get(0).jätka();
+                valgeala.setPausNupp("Mute");
             }
         });
         /**ruudustik.getPlayNupp().setOnMouseClicked(event -> { //kui ruudustikus valge ala peal oleva nupu peale vajutati

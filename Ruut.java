@@ -8,7 +8,7 @@ public class Ruut extends StackPane {
     private int x;
     private int y;
 
-    private Nupp pealOlevNupp;
+
 
     public Ruut(int x, int y) {
         this.x = x;

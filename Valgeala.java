@@ -60,4 +60,8 @@ public class Valgeala extends Ruudustik{
     public String getTekst() {return tekst.getText();}
     public Button getPlayNupp() {return playNupp;}
     public Button getPausNupp() {return pausNupp;}
+
+    public void setPausNupp(String antudTekst) {
+        pausNupp.setText(antudTekst); //muudab teksti ära
+    }
 }
