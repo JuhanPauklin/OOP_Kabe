@@ -10,7 +10,7 @@ public class Audio {
     private Clip clip; //klipp
     private long klipipositsioon; //seda on vaja muusikaklipi peatamiseks ja jätkamiseks. Sellega teama, kust jätkata
 
-    public Audio(File fail) throws Exception {
+    public Audio(File fail) {
         this.fail = fail;
     }
 
@@ -46,9 +46,5 @@ public class Audio {
 
     public void lõpetaMuusika(){ //see meetod lõpetab muusika mängimise
         clip.close();
-    }
-
-    public long getKlipipositsioon() {
-        return klipipositsioon;
     }
 }

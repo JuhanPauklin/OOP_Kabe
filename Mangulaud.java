@@ -11,7 +11,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Mangulaud extends Application {
     @Override
@@ -20,18 +19,21 @@ public class Mangulaud extends Application {
 
         Ruudustik ruudustik = new Ruudustik(); // loob uue ruudustiku isendi, milles on olemas vBox
 
+        Valgeala valgeala = new Valgeala(ruudustik.getvBox(), ruudustik.getMaatriks());
+
         VBox vBox = ruudustik.getvBox(); // võtab ruudustiku isendist vBox'i
 
         Scene scene = new Scene(vBox, 512, 512);
 
+        //KÕIK MUUSIKAGA SEOTUD VAJALIK
         AtomicBoolean muusikaMängib = new AtomicBoolean(false); //kuna me töötame threadidega ja meil on käimas kaks threadi (audio ja stage), siis peame kasutama atomatic booleani
-        //AtomicReference<Audio> player = new AtomicReference<>(new Audio(new File("Death or Sovngarde.wav")));
 
         List<Audio> laulud = looMuusikaList();
         List<Audio> hetkelMängiv = new ArrayList<>(); //siia paneme selle laulu, mis on hetkel mängimas
+
         //KÕIK NUPUVAJUTUSED-----------------------------------------------------------------------------------------------
-        ruudustik.getPlayNupp().setOnMouseClicked(event -> { //kui ruudustikus valge ala peal oleva nupu peale vajutati
-            File antudfail = new File (ruudustik.getTekst()+".wav"); //leiame tekstivälja väärtuse ja teeme temast faili
+        valgeala.getPlayNupp().setOnMouseClicked(event -> { //kui ruudustikus valge ala peal oleva mängi-nupu peale vajutati
+            File antudfail = new File (valgeala.getTekst()+".wav"); //leiame tekstivälja väärtuse ja teeme temast faili
             //nüüd vaatame, kas meie audio failis on olemas selline laul
             for (int i = 0; i < laulud.size(); i++) {
                 if (laulud.get(i).getFail().equals(antudfail)) { //kui me leidsime sellise, siis
@@ -45,9 +47,9 @@ public class Mangulaud extends Application {
                         }
                     }//muusikamängib if lause
                     else if (muusikaMängib.get() == true) { //kui aga muusika on mängimas, peame praeguse laulu ennem kinni panema
-                        for (int j = 0; j < hetkelMängiv.size(); j++) {
-                            hetkelMängiv.get(i).lõpetaMuusika();
-                        }
+                        hetkelMängiv.get(0).lõpetaMuusika();
+                        hetkelMängiv.remove(0); //ja eemaldame ta listist
+
                         hetkelMängiv.add(laulud.get(i)); //jätame selle faili nimetuse meelde
                         try { //proovime muusikat mängida
                             laulud.get(i).mängiMuusikat();
@@ -57,6 +59,17 @@ public class Mangulaud extends Application {
                     }//else if
                 }  //if lause
             } //for-tsükkel
+        });
+
+        valgeala.getPausNupp().setOnMouseClicked(event -> { //kui vajutati pausi nupu peale
+            if (muusikaMängib.get() == true) { //siis kõigepealt üldse vaatame, kas muusika mängib. kui jah, siis
+                muusikaMängib.set(false);
+                hetkelMängiv.get(0).paus();
+
+            } else if (muusikaMängib.get() == false && hetkelMängiv.size() != 0) { //kui muusika ei mängi ja laulu enne mängiti (ehk pandi laul pausi peale)
+                muusikaMängib.set(true);
+                hetkelMängiv.get(0).jätka();
+            }
         });
         /**ruudustik.getPlayNupp().setOnMouseClicked(event -> { //kui ruudustikus valge ala peal oleva nupu peale vajutati
             if(muusikaMängib.get() == true) { //kõigepealt kontrollime, kas meil muusika mängib. Kui mängib, paneme kinni
