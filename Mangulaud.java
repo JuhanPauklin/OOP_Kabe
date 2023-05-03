@@ -27,7 +27,7 @@ public class Mangulaud extends Application {
 
         //KÕIK MUUSIKAGA SEOTUD VAJALIK
         AtomicBoolean muusikaMängib = new AtomicBoolean(false); //kuna me töötame threadidega ja meil on käimas kaks threadi (audio ja stage), siis peame kasutama atomatic booleani
-
+        AtomicBoolean muusikaPausipeal = new AtomicBoolean(false);
         List<Audio> laulud = looMuusikaList();
         List<Audio> hetkelMängiv = new ArrayList<>(); //siia paneme selle laulu, mis on hetkel mängimas
 
@@ -39,6 +39,13 @@ public class Mangulaud extends Application {
                 if (laulud.get(i).getFail().equals(antudfail)) { //kui me leidsime sellise, siis
                     if (muusikaMängib.get() == false) { //kui muusika pole mängimas, paneme käima
                         muusikaMängib.set(true);
+
+                        //lisaks kontrollime, kas muusika oli enne pausi peal. Kui oli, siis ta enam pole pausi peal
+                        if (muusikaPausipeal.get() == true) {
+                            muusikaPausipeal.set(false);
+                            valgeala.setPausNupp("Mute");
+                            hetkelMängiv.remove(0); //ja eemaldame selle laulu listist
+                        }
                         hetkelMängiv.add(laulud.get(i)); //jätame selle faili nimetuse meelde
                         try { //proovime muusikat mängida
                             laulud.get(i).mängiMuusikat();
@@ -62,13 +69,16 @@ public class Mangulaud extends Application {
         });
 
         valgeala.getPausNupp().setOnMouseClicked(event -> { //kui vajutati pausi nupu peale
-            if (muusikaMängib.get() == true) { //siis kõigepealt üldse vaatame, kas muusika mängib. kui jah, siis
+            if (muusikaMängib.get() == true && muusikaPausipeal.get() == false) { //siis kõigepealt üldse vaatame, kas muusika mängib. kui jah, siis
                 muusikaMängib.set(false);
+                muusikaPausipeal.set(true);
+
                 hetkelMängiv.get(0).paus();
                 valgeala.setPausNupp("Unmute");
 
-            } else if (muusikaMängib.get() == false && hetkelMängiv.size() != 0) { //kui muusika ei mängi ja laulu enne mängiti (ehk pandi laul pausi peale)
+            } else if (muusikaMängib.get() == false && hetkelMängiv.size() != 0 && muusikaPausipeal.get() == true) { //kui muusika ei mängi ja laulu enne mängiti (ehk pandi laul pausi peale)
                 muusikaMängib.set(true);
+                muusikaPausipeal.set(false);
                 hetkelMängiv.get(0).jätka();
                 valgeala.setPausNupp("Mute");
             }
