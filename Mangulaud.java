@@ -6,6 +6,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.*;
 
 import java.util.ArrayList;
@@ -28,15 +29,21 @@ public class Mangulaud extends Application {
         //KÕIK MUUSIKAGA SEOTUD VAJALIK
         AtomicBoolean muusikaMängib = new AtomicBoolean(false); //kuna me töötame threadidega ja meil on käimas kaks threadi (audio ja stage), siis peame kasutama atomatic booleani
         AtomicBoolean muusikaPausipeal = new AtomicBoolean(false);
+        AtomicBoolean õigestiSisestatudLaul = new AtomicBoolean(false);
         List<Audio> laulud = looMuusikaList();
         List<Audio> hetkelMängiv = new ArrayList<>(); //siia paneme selle laulu, mis on hetkel mängimas
+        List<String> kõikmängitudlaulud = new ArrayList<>(); //siia paneme kõik laulude nimetused, mida oleme mänginud
 
         //KÕIK NUPUVAJUTUSED-----------------------------------------------------------------------------------------------
         valgeala.getPlayNupp().setOnMouseClicked(event -> { //kui ruudustikus valge ala peal oleva mängi-nupu peale vajutati
-            File antudfail = new File (valgeala.getTekst()+".wav"); //leiame tekstivälja väärtuse ja teeme temast faili
+            File antudfail = new File (valgeala.getTekstitekst()+".wav"); //leiame tekstivälja väärtuse ja teeme temast faili
             //nüüd vaatame, kas meie audio failis on olemas selline laul
             for (int i = 0; i < laulud.size(); i++) {
                 if (laulud.get(i).getFail().equals(antudfail)) { //kui me leidsime sellise, siis
+                    õigestiSisestatudLaul.set(true); //siis kõigepealt muudame väärtust true-iks, et oleme leidnud sellise laulu
+
+                    kõikmängitudlaulud.add(valgeala.getTekstitekst()); //kirjutame laulu nimetuse laulude logide listi
+
                     if (muusikaMängib.get() == false) { //kui muusika pole mängimas, paneme käima
                         muusikaMängib.set(true);
 
@@ -66,6 +73,11 @@ public class Mangulaud extends Application {
                     }//else if
                 }  //if lause
             } //for-tsükkel
+
+            //nüüd me kontrollime, kas me leidsime sellise laulu. Kui ei, siis peame väärtuse false-iks muutma, et järgmise lauluga kontroll töötaks
+            if (õigestiSisestatudLaul.get() == false)
+                throw new ValeMuusikaErind("Valesti sisestatud laul", valgeala.getTekst());
+            õigestiSisestatudLaul.set(false);
         });
 
         valgeala.getPausNupp().setOnMouseClicked(event -> { //kui vajutati pausi nupu peale
@@ -74,69 +86,46 @@ public class Mangulaud extends Application {
                 muusikaPausipeal.set(true);
 
                 hetkelMängiv.get(0).paus();
-                valgeala.setPausNupp("Unmute");
+                valgeala.setPausNupp("Edasi");
 
             } else if (muusikaMängib.get() == false && hetkelMängiv.size() != 0 && muusikaPausipeal.get() == true) { //kui muusika ei mängi ja laulu enne mängiti (ehk pandi laul pausi peale)
                 muusikaMängib.set(true);
                 muusikaPausipeal.set(false);
                 hetkelMängiv.get(0).jätka();
-                valgeala.setPausNupp("Mute");
+                valgeala.setPausNupp("Paus");
             }
         });
-        /**ruudustik.getPlayNupp().setOnMouseClicked(event -> { //kui ruudustikus valge ala peal oleva nupu peale vajutati
-            if(muusikaMängib.get() == true) { //kõigepealt kontrollime, kas meil muusika mängib. Kui mängib, paneme kinni
-                player.get().lõpetaMuusika();
-                muusikaMängib.set(false);
-            }
-            String failinimi = ruudustik.getTekst(); //siis võtame tekstiväljast tema väärtuse
-            File antudfail = new File (failinimi+".wav"); //teeme temast faili
 
-            //nüüd vaatame, kas meie audio failis on olemas selline laul
-            for (int i = 0; i < laulud.size(); i++) {
-                player.set(laulud.get(i));
-                if (player.get().getFail().equals(antudfail)) { //kui me leidsime sellise, siis
-
-                    if (muusikaMängib.get() == false) { //kui muusika pole mängimas, paneme käima
-                        muusikaMängib.set(true); //muudame booleani väärtust
-                        try { //proovime muusikat mängida
-                            player.get().mängiMuusikat();
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }//teine if
-                } //if lause
-            }
-        }); **/
 
         //KÕIK KLAHVIVAJUTUSED---------------------------------------------------------------------------------------------
-        /**scene.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER && muusikaMängib.get() == false) { //kui klaviatuuri vajutus oli "Enter" klahv ja muusikat ei mängita praegu
-                muusikaMängib.set(true); //muudame meie boolean väärtust "true"-ks. Seda on vaja selleks, et me ei saaks mitu korda samat laulu mängida
-                try { //proovime muusikat mängida
-                    player.get().mängiMuusikat();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            } //if lause
 
-            else if (event.getCode() == KeyCode.ENTER && muusikaMängib.get() == true){ //kui muusika mängib, siis lõpetame
-                muusikaMängib.set(false); //siis muudame booleani väärtust "false"-iks, et oleks võimalik uuesti muusikat mängida
-                player.get().lõpetaMuusika(); //lõpetab muusika mängimise
-            }  //else if
-        });
+        scene.setOnKeyReleased(event -> { //kui klaviatuuri vajutus oli enter ilma, et tekstfield on selected
+            if (event.getCode() == KeyCode.P && muusikaMängib.get() == true && muusikaPausipeal.get() == false) { //kui klaviatuuri vajutus oli "P" klahv ja muusika mängib
+                muusikaMängib.set(false);
+                muusikaPausipeal.set(true);
 
-        scene.setOnKeyReleased(event -> {
-            if (event.getCode() == KeyCode.P && muusikaMängib.get() == true) { //kui klaviatuuri vajutus oli "P" klahv ja muusika mängib
-                muusikaMängib.set(false); //siis muudame booleani väärtust "false"-iks, et oleks võimalik uuesti muusikat mängida
-                player.get().paus(); //paneme muusika pausile
+                hetkelMängiv.get(0).paus();
+                valgeala.setPausNupp("Edasi");
+                ; //paneme muusika pausile
             }//if lause
 
-            else if (event.getCode() == KeyCode.P && muusikaMängib.get() == false) {
-                muusikaMängib.set(true); //muudame boolean väärtust jälle
-                player.get().jätka(); //jätkame
+            else if (event.getCode() == KeyCode.P && hetkelMängiv.size() != 0 && muusikaPausipeal.get() == true) {
+                muusikaMängib.set(true);
+                muusikaPausipeal.set(false);
+                hetkelMängiv.get(0).jätka();
+                valgeala.setPausNupp("Paus");
             }
-        }); **/
+        });
 
+
+        //STSEENI KINNI PANEK
+        stage.setOnCloseRequest((e) -> { //kui me panime stseeni kinni
+            try {
+                kirjutaLaulFaili(kõikmängitudlaulud); //kirjutame kõik laulud faili
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
         stage.setScene(scene);
         stage.show();
 
@@ -160,5 +149,13 @@ public class Mangulaud extends Application {
             } //while tsükkel
         } //try
         return laulud;
+    }
+
+    public static void kirjutaLaulFaili(List<String> laulud) throws IOException{
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("lauludelogi.txt"), "UTF-8"))) {
+            for (int i = 0; i < laulud.size(); i++) {
+                bw.write(laulud.get(i) + "\n");//kirjutame iga rea listi
+            }
+        } //try
     }
 }

@@ -29,7 +29,7 @@ public class Valgeala extends Ruudustik{
 
         tekst = new TextField("mingi tekst"); //anname isendiväljadele väärtused
         playNupp = new Button("Mängi");
-        pausNupp = new Button("Mute");
+        pausNupp = new Button("Paus");
 
         vboxtekstiväli.getChildren().add(tekst);
         vboxnuppMängi.getChildren().add(playNupp);
@@ -57,9 +57,14 @@ public class Valgeala extends Ruudustik{
     }
 
     //teeme nuppude ja teksti jaoks get meetodid. Teksti returnib ta stringina
-    public String getTekst() {return tekst.getText();}
+    public String getTekstitekst() {return tekst.getText();}
     public Button getPlayNupp() {return playNupp;}
     public Button getPausNupp() {return pausNupp;}
+
+    //returnnib textfieldi ise
+    public TextField getTekst() {
+        return tekst;
+    }
 
     public void setPausNupp(String antudTekst) {
         pausNupp.setText(antudTekst); //muudab teksti ära
