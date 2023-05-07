@@ -13,10 +13,12 @@ public class Peameetod extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         stage.setTitle("Kabe");
-
-        Ruudustik ruudustik = new Ruudustik(); // loob uue ruudustiku isendi, milles on olemas vBox
-
+        Meta meta = new Meta(true);
+        Ruudustik ruudustik = new Ruudustik(meta); // loob uue ruudustiku isendi, milles on olemas vBox
+        Ruudustik.asetaNupud(ruudustik.getMaatriks(), meta);
         VBox vBox = ruudustik.getvBox(); // võtab ruudustiku isendist vBox'i
+
+        meta.nuppudeLugemine(stage);
 
         Scene scene = new Scene(vBox, 512, 512);
 
