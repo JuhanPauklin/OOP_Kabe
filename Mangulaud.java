@@ -4,9 +4,12 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
-import java.awt.*;
+import javafx.scene.control.Button;
 import java.io.*;
 
 import java.util.ArrayList;
@@ -16,9 +19,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Mangulaud extends Application {
     @Override
     public void start(Stage stage) throws Exception {
+        startEkraan(stage);
+
         stage.setTitle("Kabe");
 
-        Ruudustik ruudustik = new Ruudustik(); // loob uue ruudustiku isendi, milles on olemas vBox
+        Meta meta = new Meta(true);
+        Ruudustik ruudustik = new Ruudustik(meta); // loob uue ruudustiku isendi, milles on olemas vBox
+        Ruudustik.asetaNupud(ruudustik.getMaatriks(), meta);
 
         Valgeala valgeala = new Valgeala(ruudustik.getvBox(), ruudustik.getMaatriks());
 
@@ -96,11 +103,16 @@ public class Mangulaud extends Application {
             }
         });
 
+        valgeala.getAnnaAllaNupp().setOnMouseClicked(event -> { //kui ruudustikus valge ala peal oleva anna alla nupu peale vajutati
+            if (muusikaMängib.get() == true) //kui muusika mängib
+                hetkelMängiv.get(0).lõpetaMuusika(); //siis lõpetame selle
+            meta.võiduEkraan(stage, !meta.isMustaKord()); //kui musta kord on, siis on vaja, et ta annaks meile ette "VALGE VÕITIS", selleks muudame väärtuse vastupidiseks
 
+        });
         //KÕIK KLAHVIVAJUTUSED---------------------------------------------------------------------------------------------
 
-        scene.setOnKeyReleased(event -> { //kui klaviatuuri vajutus oli enter ilma, et tekstfield on selected
-            if (event.getCode() == KeyCode.P && muusikaMängib.get() == true && muusikaPausipeal.get() == false) { //kui klaviatuuri vajutus oli "P" klahv ja muusika mängib
+        scene.setOnKeyReleased(event -> { //kui klaviatuuri vajutus oli ctrl
+            if (event.getCode() == KeyCode.CONTROL && muusikaMängib.get() == true && muusikaPausipeal.get() == false) { //kui klaviatuuri vajutus oli "P" klahv ja muusika mängib
                 muusikaMängib.set(false);
                 muusikaPausipeal.set(true);
 
@@ -109,7 +121,7 @@ public class Mangulaud extends Application {
                 ; //paneme muusika pausile
             }//if lause
 
-            else if (event.getCode() == KeyCode.P && hetkelMängiv.size() != 0 && muusikaPausipeal.get() == true) {
+            else if (event.getCode() == KeyCode.CONTROL && hetkelMängiv.size() != 0 && muusikaPausipeal.get() == true) {
                 muusikaMängib.set(true);
                 muusikaPausipeal.set(false);
                 hetkelMängiv.get(0).jätka();
@@ -126,6 +138,15 @@ public class Mangulaud extends Application {
                 throw new RuntimeException(ex);
             }
         });
+
+        stage.setOnHidden((e) -> { //kui võidu ekraan tuleb lahti, siis läheb see stseen peitu. Loome siis logifaili juhul, kui tegemist pole start-ekraaniga
+            try {
+                kirjutaLaulFaili(kõikmängitudlaulud); //kirjutame kõik laulud faili
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
         stage.setScene(scene);
         stage.show();
 
@@ -157,5 +178,31 @@ public class Mangulaud extends Application {
                 bw.write(laulud.get(i) + "\n");//kirjutame iga rea listi
             }
         } //try
+    }
+
+    public static void startEkraan(Stage stage) {
+        BorderPane küljendus = new BorderPane();
+        Stage teine = new Stage();
+        Text stardiTekst = new Text();
+
+        stardiTekst.setFont(Font.font("Impact", FontWeight.BOLD, 70));
+        stardiTekst.setText("KABE");
+
+        Button stardiNupp = new Button("Start");
+
+        küljendus.setCenter(stardiTekst);
+        küljendus.setBottom(stardiNupp);
+
+
+        Scene stseen2 = new Scene(küljendus, 500, 150, Color.SNOW);
+        teine.setTitle("StartEkraan");
+        teine.setResizable(false);
+        teine.setScene(stseen2);
+        teine.show();
+
+        stardiNupp.setOnMouseClicked((event) -> { //kui vajutatakse stardinupu peale
+            teine.close();
+            stage.show();
+        });
     }
 }
