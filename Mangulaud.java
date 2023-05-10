@@ -1,6 +1,7 @@
 package com.example.oop_kabe;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
@@ -8,6 +9,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import java.io.*;
@@ -148,7 +150,7 @@ public class Mangulaud extends Application {
         });
 
         stage.setScene(scene);
-        stage.show();
+        stage.hide();
 
     }
 
@@ -181,17 +183,16 @@ public class Mangulaud extends Application {
     }
 
     public static void startEkraan(Stage stage) {
-        BorderPane küljendus = new BorderPane();
+        VBox küljendus = new VBox();
         Stage teine = new Stage();
         Text stardiTekst = new Text();
+        Button stardiNupp = new Button("Start");
 
         stardiTekst.setFont(Font.font("Impact", FontWeight.BOLD, 70));
         stardiTekst.setText("KABE");
 
-        Button stardiNupp = new Button("Start");
-
-        küljendus.setCenter(stardiTekst);
-        küljendus.setBottom(stardiNupp);
+        küljendus.getChildren().addAll(stardiTekst, stardiNupp);
+        küljendus.setAlignment(Pos.CENTER);
 
 
         Scene stseen2 = new Scene(küljendus, 500, 150, Color.SNOW);
